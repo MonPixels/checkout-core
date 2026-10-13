@@ -20,12 +20,19 @@ describe("quote", () => {
     expect(result).toEqual({ subtotal: 3700, discount: 0, shipping: 599, tax: 222, total: 4521, appliedCode: undefined, notices: [] });
   });
 
-  it("ships free at or above the threshold", () => {
+  it("ships free above the threshold", () => {
     const result = quote(cartWith([board, 1], [mug, 1]), { region: "US-NY" });
 
     expect(result.shipping).toBe(0);
     expect(result.tax).toBe(240);
     expect(result.total).toBe(6240);
+  });
+
+  it("charges shipping at exactly the threshold", () => {
+    const result = quote(cartWith([mug, 1], [candle, 2], [{ sku: "PEN", name: "Pen", unitPrice: 550 }, 1]), { region: "US-NY" });
+
+    expect(result.subtotal).toBe(5_000);
+    expect(result.shipping).toBe(599);
   });
 
   it("applies a percent code before shipping and tax", () => {
