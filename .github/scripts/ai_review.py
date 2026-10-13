@@ -9,7 +9,8 @@ import urllib.request
 MAX_DIFF_CHARS = 12000
 
 GITHUB_API = "https://api.github.com"
-AI_API_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_BASE_URL = "https://api.openai.com/v1"
+ZAI_BASE_URL = "https://api.z.ai/api/paas/v4"
 
 
 def post(url, token, payload):
@@ -31,7 +32,13 @@ def main():
     repo = os.environ["GITHUB_REPOSITORY"]
     pr_number = os.environ["PR_NUMBER"]
     api_key = os.environ["AI_API_KEY"]
-    model = os.environ.get("AI_MODEL", "gpt-4o-mini")
+    model = (os.environ.get("AI_MODEL") or "").strip()
+    base_url = (os.environ.get("AI_BASE_URL") or "").strip().rstrip("/")
+    if not base_url:
+        base_url = ZAI_BASE_URL if model.lower().startswith("glm") else DEFAULT_BASE_URL
+    if not model:
+        model = "glm-4.6" if base_url == ZAI_BASE_URL else "gpt-4o-mini"
+    ai_api_url = f"{base_url}/chat/completions"
 
     # Fetch the PR diff.
     req = urllib.request.Request(
@@ -59,7 +66,7 @@ def main():
     )
 
     req = urllib.request.Request(
-        AI_API_URL,
+        ai_api_url,
         data=json.dumps({
             "model": model,
             "messages": [
