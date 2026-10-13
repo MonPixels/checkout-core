@@ -97,5 +97,12 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(f"AI review failed: {exc}", file=sys.stderr)
+        detail = ""
+        if hasattr(exc, "read"):
+            try:
+                detail = exc.read().decode("utf-8", errors="replace")[:500]
+            except Exception:
+                pass
+        msg = f"AI review failed: {exc} {detail}".replace("\n", " ")
+        print(f"::error::{msg}")
         sys.exit(1)
