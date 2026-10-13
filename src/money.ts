@@ -14,5 +14,5 @@ export function formatCents(cents: Cents, currency = "USD", locale = "en-US"): s
 
 /** Percentage of an amount, rounded to the nearest cent. */
 export function percentOf(cents: Cents, percent: number): Cents {
-  return Math.round((cents * percent) / 100);
+  return Math.floor((cents * percent) / 100);
 }
