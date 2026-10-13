@@ -30,8 +30,12 @@ def main():
     github_token = os.environ["GITHUB_TOKEN"]
     repo = os.environ["GITHUB_REPOSITORY"]
     pr_number = os.environ["PR_NUMBER"]
-    api_key = os.environ["AI_API_KEY"]
+    api_key = os.environ.get("AI_API_KEY", "")
     model = os.environ.get("AI_MODEL", "gpt-4o-mini")
+
+    if not api_key:
+        print("AI_API_KEY secret is not configured; skipping review.")
+        return
 
     # Fetch the PR diff.
     req = urllib.request.Request(
@@ -73,8 +77,14 @@ def main():
             "Content-Type": "application/json",
         },
     )
-    with urllib.request.urlopen(req) as resp:
-        ai_resp = json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req) as resp:
+            ai_resp = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            print(f"AI API returned {e.code}: check that AI_API_KEY is valid. Skipping review.")
+            return
+        raise
     review = ai_resp["choices"][0]["message"]["content"].strip()
 
     body = f"### AI Review ({model})\n\n{review}"

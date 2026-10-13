@@ -29,7 +29,8 @@ describe("quote", () => {
   });
 
   it("charges shipping at exactly the threshold", () => {
-    const result = quote(cartWith([mug, 1], [candle, 2], [{ sku: "PEN", name: "Pen", unitPrice: 550 }, 1]), { region: "US-NY" });
+    const filler = { sku: "FILLER", name: "Filler item", unitPrice: 800 };
+    const result = quote(cartWith([board, 1], [filler, 1]), { region: "US-NY" });
 
     expect(result.subtotal).toBe(5_000);
     expect(result.shipping).toBe(599);
